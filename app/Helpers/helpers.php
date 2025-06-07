@@ -20,3 +20,23 @@ function getUser($param)
 
     return $user;
 }
+
+// Function to check if the user has a pin set
+function pinChecker($pin) {
+    $user = \Illuminate\Support\Facades\Auth::user();
+    $wallet = Wallet::where('user_id', $user->id)->first();
+
+    if (!$wallet) {
+        return false;
+    }
+
+    if ($wallet->pin === null) {
+        return false;
+    }
+
+    if ($wallet->pin === $pin) {
+        return true;
+    }
+
+    return false;
+}
