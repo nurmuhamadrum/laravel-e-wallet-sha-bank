@@ -70,7 +70,14 @@ class AuthController extends Controller
             ]);
 
             DB::commit();
-            return response()->json(['message' => 'Registration successful', 'user' => $user], 201); 
+            $token = JWTAuth::attempt(['email' => $request->email, 'password' => $request->password]);
+            
+            $userResponse = getUser($request->email); 
+            $userResponse->token = $token; // Add token to user response
+            $userResponse->token_expires_in = JWTAuth::factory()->getTTL() * 60; // Token expiration time in seconds
+            $userResponse->token_type = 'Bearer'; // Token type
+
+            return response()->json($userResponse, 200);
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json(['message' => 'Registration failed', 'error' => $th->getMessage()], 500);
