@@ -11,6 +11,7 @@ use App\Models\Wallet;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Melihovv\Base64ImageDecoder\Base64ImageDecoder;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
@@ -73,6 +74,36 @@ class AuthController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json(['message' => 'Registration failed', 'error' => $th->getMessage()], 500);
+        }
+    }
+
+    // Login a user
+    public function login(Request $request)
+    {
+        $credential = $request->all();
+        $validator = Validator::make($credential, [
+            'email' => 'required|email',
+            'password' => 'required|string|min:6',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->messages()], 400);
+        }
+
+        try {
+            $token = JWTAuth::attempt($credential);
+            if (!$token) {
+                return response()->json(['message' => 'Invalid credentials'], 401);
+            }
+
+            $userResponse = getUser($request->email); 
+            $userResponse->token = $token; // Add token to user response
+            $userResponse->token_expires_in = JWTAuth::factory()->getTTL() * 60; // Token expiration time in seconds
+            $userResponse->token_type = 'Bearer'; // Token type
+
+            return response()->json($userResponse, 200);
+        } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
+            return response()->json(['errors' => $e->getMessage()], 500);
         }
     }
 
