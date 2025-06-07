@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->timestamp('username')->unique();
+            $table->string('username')->unique();
             $table->string('password');
             $table->boolean('verified');
             $table->string('profile_picture');
