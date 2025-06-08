@@ -17,7 +17,7 @@ class WebhookController extends Controller
         $notif = new \Midtrans\Notification();
 
         $transactionStatus = $notif->transaction_status;
-        $transactoinType = $notif->payment_type;
+        $transactionType = $notif->payment_type;
         $transactionCode = $notif->order_id;
         $fraud = $notif->fraud_status;
 
